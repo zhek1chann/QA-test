@@ -4,11 +4,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from .base_page import BasePage  # Assuming this class is properly defined in the base_page module
+# from .base_page import BasePage  # Assuming this class is properly defined in the base_page module
 
-class FlightBookingPage(BasePage):
+class FlightBookingPage():
     def __init__(self, driver):
-        super().__init__(driver)
+        self.driver = driver
         self.driver.get("https://blazedemo.com/")
 
     def select_city(self, dropdown_selector, city_name):

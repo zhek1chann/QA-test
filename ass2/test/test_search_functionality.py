@@ -14,7 +14,7 @@ class TestSearchFunctionality(unittest.TestCase):
         self.search_page.enter_search_term("Arcane")
         time.sleep(4)
         result_title = self.search_page.get_first_result_title()
-        self.assertIn("Аркейн", result_title, "Selenium not found in the first result title")
+        self.assertIn("Аркейн'", result_title, "Selenium not found in the first result title")
 
     def tearDown(self):
         self.driver.quit()

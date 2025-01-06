@@ -27,7 +27,6 @@ class FlightBookingPage(BasePage):
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table.table"))
         )
-        # Select the first available flight
         self.select_first_flight()
 
     def select_first_flight(self):

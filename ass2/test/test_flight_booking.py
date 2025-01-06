@@ -2,6 +2,7 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.common.by import By  # Ensure By is imported here
 from pages.flight_booking_page import FlightBookingPage
+import time
 
 class TestBlazeDemoFlightBooking(unittest.TestCase):
     def setUp(self):
@@ -10,7 +11,9 @@ class TestBlazeDemoFlightBooking(unittest.TestCase):
 
     def test_flight_booking(self):
         self.flight_booking_page.book_flight("San Francisco", "London")
+        time.sleep(1)
         self.flight_booking_page.fill_purchase_form()
+        time.sleep(2)
 
         # Verify the confirmation message
         confirmation_message = self.driver.find_element(By.CSS_SELECTOR, "h1")
