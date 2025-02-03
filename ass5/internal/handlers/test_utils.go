@@ -77,13 +77,12 @@ func (ts *TestServer) postForm(t *testing.T, url string, form url.Values) (int, 
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	req.AddCookie(&http.Cookie{
-		Name:  sessionNameInCookie,
-		Value: sessionCookieValue,
-	})
+	// req.AddCookie(&http.Cookie{
+	// 	Name:  sessionNameInCookie,
+	// 	Value: sessionCookieValue,
+	// })
 
 	res, err := ts.Client().Do(req)
 	if err != nil {

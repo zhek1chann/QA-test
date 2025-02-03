@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"forum/models"
 	"forum/pkg/cookie"
 	"forum/pkg/validator"
@@ -33,15 +34,14 @@ func (h *handler) loginGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) loginPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ping")
 	form := models.UserLoginForm{
 		Email:    strings.ToLower(r.FormValue("email")),
 		Password: r.FormValue("password"),
 	}
-
+	fmt.Println(form)
 	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
-
-	session, err := h.service.Authenticate(form.Email, form.Password)
 
 	if !form.Valid() {
 		data, err := h.NewTemplateData(r)
@@ -58,7 +58,9 @@ func (h *handler) loginPost(w http.ResponseWriter, r *http.Request) {
 		h.app.Render(w, http.StatusUnprocessableEntity, "login.html", data)
 		return
 	}
+	session, err := h.service.Authenticate(form.Email, form.Password)
 
+	fmt.Println(session, err)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			form.AddFieldError("email", "email doesn't exist")
@@ -126,7 +128,7 @@ func (h *handler) signupPost(w http.ResponseWriter, r *http.Request) {
 		Email:    strings.ToLower(r.FormValue("email")),
 		Password: r.FormValue("password"),
 	}
-
+	fmt.Println(form)
 	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Name, 12), "name", "This field must be 12 characters long maximum")
 	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")

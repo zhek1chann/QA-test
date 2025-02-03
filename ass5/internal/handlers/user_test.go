@@ -57,7 +57,7 @@ func TestSignUp(t *testing.T) {
 			email:         validEmail,
 			password:      validPassword,
 			passwordAgain: validPassword,
-			wantCode:      http.StatusUnprocessableEntity,
+			wantCode:      http.StatusSeeOther,
 		},
 		{
 			name:          "Blank username",
@@ -67,7 +67,6 @@ func TestSignUp(t *testing.T) {
 			passwordAgain: validPassword,
 			wantCode:      http.StatusUnprocessableEntity,
 		},
-		// ... (the rest of your test cases)
 	}
 
 	for _, tt := range tests {
@@ -75,10 +74,10 @@ func TestSignUp(t *testing.T) {
 			logrus.Infof("Running test case: %q", tt.name)
 
 			form := url.Values{}
-			form.Add("username-signup", tt.username)
-			form.Add("email-signup", tt.email)
-			form.Add("password-signup", tt.password)
-			form.Add("password-again", tt.passwordAgain)
+			form.Add("name", tt.username)
+			form.Add("email", tt.email)
+			form.Add("password", tt.password)
+			form.Add("password", tt.passwordAgain)
 
 			code, _, _ := ts.postForm(t, "/signup", form)
 
@@ -120,19 +119,19 @@ func TestUserLoginPost(t *testing.T) {
 		password string
 		wantCode int
 	}{
-		{
-			name:     "Valid login",
-			email:    validEmail,
-			password: validPassword,
-			wantCode: http.StatusUnprocessableEntity,
-		},
+
 		{
 			name:     "Incorrect email",
 			email:    "naaaaaaaah@gmail.com@gmail.com",
 			password: validPassword,
 			wantCode: http.StatusUnprocessableEntity,
 		},
-		// ...
+		{
+			name:     "Valid login",
+			email:    validEmail,
+			password: validPassword,
+			wantCode: http.StatusSeeOther,
+		},
 	}
 
 	for _, tt := range tests {
@@ -140,9 +139,8 @@ func TestUserLoginPost(t *testing.T) {
 			logrus.Infof("Running test case: %q", tt.name)
 
 			form := url.Values{}
-			form.Add("email-login", tt.email)
-			form.Add("password-login", tt.password)
-
+			form.Add("email", tt.email)
+			form.Add("password", tt.password)
 			code, _, _ := ts.postForm(t, "/login", form)
 
 			if code != tt.wantCode {
