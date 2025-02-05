@@ -195,6 +195,34 @@ func TestUserLoginPost(t *testing.T) {
 	logrus.Info("TestUserLoginPost: Completed Excel-driven tests for /login")
 }
 
+func waitForElement(wd selenium.WebDriver, by, value string, timeout time.Duration) error {
+	end := time.Now().Add(timeout)
+	for {
+		if time.Now().After(end) {
+			return fmt.Errorf("timeout waiting for element %s=%s", by, value)
+		}
+		_, err := wd.FindElement(by, value)
+		if err == nil {
+			return nil // Element is found
+		}
+		time.Sleep(time.Second) // Wait for a second before checking again
+	}
+}
+
+func waitForErrorElement(wd selenium.WebDriver, timeout time.Duration) error {
+	end := time.Now().Add(timeout)
+	for {
+		if time.Now().After(end) {
+			return fmt.Errorf("timeout waiting for any error message to appear")
+		}
+		elements, err := wd.FindElements(selenium.ByName, "email")
+		if err == nil && len(elements) > 0 {
+			return nil // Error message element is found
+		}
+		time.Sleep(1 * time.Second) // Sleep briefly before trying again
+	}
+}
+
 // ----- E2E Test via BrowserStack Using Selenium -----
 //
 // This test demonstrates how you might use BrowserStack to perform a
@@ -215,11 +243,7 @@ func TestUserLoginBrowserStack(t *testing.T) {
 	// (Set BROWSERSTACK_USER and BROWSERSTACK_KEY in your environment.)
 	bsUser := "cowbuno_7Tam42"
 	bsKey := "QJsbG7ySCnDoqzB2tFt9"
-	// if bsUser == "" || bsKey == "" {
-	// 	t.Fatal("BrowserStack credentials are not set in environment variables")
-	// }
 
-	// Define desired capabilities.
 	caps := selenium.Capabilities{
 		"browserName":     "Chrome",
 		"browser_version": "latest",
@@ -239,7 +263,7 @@ func TestUserLoginBrowserStack(t *testing.T) {
 
 	// URL of your deployed forum login page.
 	// Ensure this is accessible from BrowserStack.
-	forumURL := "http://your-forum-app-url.com/login" // <-- REPLACE with your actual URL
+	forumURL := "http://188.227.35.5:8080/login"
 
 	for _, tc := range loginTests {
 		t.Run(tc.Name, func(t *testing.T) {
@@ -253,11 +277,11 @@ func TestUserLoginBrowserStack(t *testing.T) {
 
 			// Fill in login form fields.
 			// Adjust selectors (ByID, ByCSSSelector, etc.) as needed.
-			emailElem, err := wd.FindElement(selenium.ByID, "email-login")
+			emailElem, err := wd.FindElement(selenium.ByName, "email")
 			if err != nil {
 				t.Fatalf("Failed to find email input: %v", err)
 			}
-			passwordElem, err := wd.FindElement(selenium.ByID, "password-login")
+			passwordElem, err := wd.FindElement(selenium.ByName, "password")
 			if err != nil {
 				t.Fatalf("Failed to find password input: %v", err)
 			}
@@ -267,7 +291,17 @@ func TestUserLoginBrowserStack(t *testing.T) {
 			passwordElem.SendKeys(tc.Password)
 
 			// Click the login button.
-			loginButton, err := wd.FindElement(selenium.ByID, "login-button")
+			// loginButton, err := wd.FindElement(selenium.ByCSSSelector, "button[type='submit']")
+			// loginButton, err := wd.FindElement(selenium.ByID, "submit")
+			// loginButton, err := wd.FindElement(selenium.ByCSSSelector, "input[value='Login']")
+			// loginButton, err := wd.FindElement(selenium.ByXPATH, "//input[@type='submit' and @value='Login']")
+
+			// Validate the outcome based on your expectation.
+			// For example, suppose a successful login shows an element with ID "user-home"
+			// and a failed login shows an element with ID "login-error".
+			// Click the login button.
+			// Click the login button.
+			loginButton, err := wd.FindElement(selenium.ByXPATH, "//input[@type='submit' and @value='Login']")
 			if err != nil {
 				t.Fatalf("Failed to find login button: %v", err)
 			}
@@ -275,21 +309,17 @@ func TestUserLoginBrowserStack(t *testing.T) {
 				t.Fatalf("Failed to click login button: %v", err)
 			}
 
-			// Allow time for the login action to process.
-			time.Sleep(5 * time.Second)
-
-			// Validate the outcome based on your expectation.
-			// For example, suppose a successful login shows an element with ID "user-home"
-			// and a failed login shows an element with ID "login-error".
-			if tc.WantCode == http.StatusOK {
-				// Check for an element that appears only on a successful login.
-				if _, err := wd.FindElement(selenium.ByID, "user-home"); err != nil {
-					t.Errorf("Expected successful login, but did not find element 'user-home': %v", err)
+			// Wait for outcome
+			if tc.WantCode == http.StatusSeeOther {
+				err = waitForElement(wd, selenium.ByID, "user-home", 10*time.Second)
+				if err != nil {
+					t.Errorf("Expected successful login, but user-home element did not appear: %v", err)
 				}
 			} else {
-				// Check for a login error indicator.
-				if _, err := wd.FindElement(selenium.ByID, "login-error"); err != nil {
-					t.Errorf("Expected login error, but did not find element 'login-error': %v", err)
+
+				err = waitForErrorElement(wd, 10*time.Second)
+				if err != nil {
+					t.Errorf("Expected an error message to appear, but it did not: %v", err)
 				}
 			}
 		})
