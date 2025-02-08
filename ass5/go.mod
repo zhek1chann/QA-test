@@ -18,6 +18,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/jstemmer/go-junit-report v1.0.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	golang.org/x/sys v0.29.0 // indirect
