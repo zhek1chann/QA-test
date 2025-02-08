@@ -130,7 +130,7 @@ func TestUserLoginPost(t *testing.T) {
 			name:     "Valid login",
 			email:    validEmail,
 			password: validPassword,
-			wantCode: http.StatusSeeOther,
+			wantCode: http.StatusAccepted,
 		},
 	}
 
